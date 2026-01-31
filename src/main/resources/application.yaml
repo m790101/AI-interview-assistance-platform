@@ -1,0 +1,91 @@
+# AI Interview Platform Config
+
+spring:
+  application:
+    name: ai-interview-platform
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:interview_guide}
+    username: ${POSTGRES_USER:admin}
+    password: ${POSTGRES_PASSWORD:123456}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create # use only for first time
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB # support upload
+      max-request-size: 50MB
+
+  # Redission setting
+  redis:
+    redission:
+      config: |
+      singleServerConfig:
+        address: "redis://${REDIS_HOST:localhost}:${REDIS_PORT:6379}"
+        database: 0
+        connectionMinimumIdleSize: 10
+        connectionPoolSize: 64
+        subscriptionConnectionMinimumIdleSize: 1
+        subscriptionConnectionPoolSize: 50
+
+  # Spring AI - 阿里云DashScope (OpenAI兼容模式)
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${AI_BAILIAN_API_KEY}
+      chat:
+        options:
+          model: ${AI_MODEL:qwen-plus}
+          temperature: 0.7
+      # Embedding model - text-embedding-v3
+      embedding:
+        options:
+          model: text-embedding-v3
+    #  no retry, if there is error then stop
+    retry:
+      max-attempts: 1
+      on-client-errors: false
+
+    # PostgreSQL Vector Store配置
+    vectorstore:
+      pgvector:
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        dimensions: 1024  # text-embedding-v3
+        initialize-schema: true # dev env = true. prod env = false
+        remove-existing-vector-store-table: false  # reserve data
+
+# Application custom configuration
+app:
+  resume:
+    upload-dir: ${java.io.tmpdir}/ai-interview/resumes
+    allowed-types:
+      - application/pdf
+      - application/msword
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - text/plain
+
+  # RustFS
+  storage:
+    endpoint: ${APP_STORAGE_ENDPOINT}
+    access-key: ${APP_STORAGE_ACCESS_KEY}
+    secret-key: ${APP_STORAGE_SECRET_KEY}
+    bucket: ${APP_STORAGE_BUCKET:interview-guide}
+    region: ${APP_STORAGE_REGION:us-east-1}
+
+  # CORS for front-end
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:5174,http://localhost:80}
+
+
+server:
+  port: 8080
+
+

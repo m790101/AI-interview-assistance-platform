@@ -1,0 +1,94 @@
+plugins {
+	id 'java'
+	alias(libs.plugins.spring.boot)
+	alias(libs.plugins.spring.dependency.management)
+//	id 'org.springframework.boot' version '4.0.3-SNAPSHOT'
+//	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'interview'
+version = '0.0.1-SNAPSHOT'
+description = 'interview guide'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url = 'https://repo.spring.io/snapshot' }
+}
+
+ext {
+	set('springAiVersion', "2.0.0-M2")
+}
+
+dependencies {
+	// Spring Boot Starters
+	implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	// Postgres
+	runtimeOnly 'org.postgresql:postgresql'
+
+
+	// Spring ai
+//	implementation 'org.springframework.ai:spring-ai-starter-model-openai'
+	implementation "org.springframework.ai:spring-ai-starter-model-openai:${libs.versions.spring.ai.get()}"
+
+	// Spring ai vector store
+//	implementation 'org.springframework.ai:spring-ai-starter-vector-store-pgvector'
+	implementation "org.springframework.ai:spring-ai-starter-vector-store-pgvector:${libs.versions.spring.ai.get()}"
+
+	// Tika - document parsing
+	implementation libs.tika.core
+	implementation libs.tika.parsers
+
+	// AWS S3 SDK for RustFS storage
+	implementation "software.amazon.awssdk:s3:${libs.versions.aws.sdk.get()}"
+
+
+	// Redisson 4.0 - Redis Client
+	implementation "org.redisson:redisson-spring-boot-starter:${libs.versions.redisson.get()}"
+
+	// PDF export - iText 8
+	implementation "com.itextpdf:itext-core:${libs.versions.itext.get()}"
+	implementation "com.itextpdf:font-asian:${libs.versions.itext.get()}"
+
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+
+
+	// MapStruct
+	implementation "org.mapstruct:mapstruct:${libs.versions.mapstruct.get()}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${libs.versions.mapstruct.get()}"
+	annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
+	testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-session-data-redis-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:${springAiVersion}"
+	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
