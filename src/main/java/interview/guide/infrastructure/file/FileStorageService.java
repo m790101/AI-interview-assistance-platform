@@ -78,6 +78,13 @@ public class FileStorageService {
 
 
     /**
+     * get file url
+     */
+    public String getFileUrl(String fileKey){
+        return String.format("%s/%s/%s", storageConfig.getEndpoint(), storageConfig.getBucket(), fileKey);
+    }
+
+    /**
      * download file
      */
     public byte[] downloadFile(String fileKey){
@@ -100,8 +107,8 @@ public class FileStorageService {
      * upload file
      */
     public String uploadFile(MultipartFile file, String prefix){
-        String originFileName = file.getOriginalFilename();
-        String fileKey = generateFileKey(originFileName, prefix);
+        String originFilename = file.getOriginalFilename();
+        String fileKey = generateFileKey(originFilename, prefix);
 
         try{
             PutObjectRequest putRequest = PutObjectRequest.builder()
@@ -111,7 +118,7 @@ public class FileStorageService {
                     .contentLength(file.getSize())
                     .build();
             s3Client.putObject(putRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-            log.info("file upload successfully: {} - {} ", originFileName, fileKey);
+            log.info("file upload successfully: {} - {} ", originFilename, fileKey);
             return fileKey;
         } catch (IOException e) {
             log.error("reading upload file is failed: {}", e.getMessage(), e);
