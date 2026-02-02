@@ -42,9 +42,9 @@ public class ResumeUploadService {
 
         // check file exists
         Optional<ResumeEntity> existingResume = persistenceService.findExistingResume(file);
-//        if(existingResume.isPresent()){
-//            return handleDuplicateResume(existingResume.get());
-//        }
+        if(existingResume.isPresent()){
+            return handleDuplicateResume(existingResume.get());
+        }
         // parse file
         String resumeText = parseService.parseResume(file);
 

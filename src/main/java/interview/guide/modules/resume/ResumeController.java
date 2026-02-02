@@ -27,7 +27,7 @@ public class ResumeController {
         Map<String, Object> result = uploadService.uploadAndAnalyze(file);
         boolean isDuplicate = (Boolean) result.get("duplicate");
         if(isDuplicate){
-            return ResponseEntity.status(HttpStatus.OK).build();
+            return ResponseEntity.status(HttpStatus.OK).body(result);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(result);
