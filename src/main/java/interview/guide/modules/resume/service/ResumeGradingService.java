@@ -55,8 +55,8 @@ public class ResumeGradingService {
     ){}
     public ResumeGradingService(
             ChatClient.Builder chatClientBuilder,
-            @Value("classpath:prompts/resume-analysis-system.st") Resource systemPromptResource,
-            @Value("classpath:prompts/resume-analysis-user.st") Resource userPromptResource) throws IOException {
+            @Value("classpath:prompts/resume-analysis-system-eng.st") Resource systemPromptResource,
+            @Value("classpath:prompts/resume-analysis-user-eng.st") Resource userPromptResource) throws IOException {
         this.chatClient = chatClientBuilder.build();
         this.systemPromptTemplate = new PromptTemplate(systemPromptResource.getContentAsString(StandardCharsets.UTF_8));
         this.userPromptTemplate = new PromptTemplate(userPromptResource.getContentAsString(StandardCharsets.UTF_8));
