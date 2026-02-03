@@ -2,7 +2,12 @@ package interview.guide.infrastructure.mapper;
 
 import interview.guide.modules.interview.model.ResumeAnalysisResponse;
 import interview.guide.modules.resume.model.ResumeAnalysisEntity;
+import interview.guide.modules.resume.model.ResumeDetailDTO;
+import interview.guide.modules.resume.model.ResumeEntity;
+import interview.guide.modules.resume.model.ResumeListItemDTO;
 import org.mapstruct.*;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ResumeMapper {
@@ -20,27 +25,27 @@ public interface ResumeMapper {
 
     // ========== ResumeListItemDTO 映射 ==========
 
-//    /**
-//     * ResumeEntity 转换为 ResumeListItemDTO
-//     * 需要额外传入 latestScore, lastAnalyzedAt, interviewCount
-//     */
-//    default ResumeListItemDTO toListItemDTO(
-//            ResumeEntity resume,
-//            Integer latestScore,
-//            java.time.LocalDateTime lastAnalyzedAt,
+    /**
+     * ResumeEntity 转换为 ResumeListItemDTO
+     * 需要额外传入 latestScore, lastAnalyzedAt, interviewCount
+     */
+    default ResumeListItemDTO toListItemDTO(
+            ResumeEntity resume,
+            Integer latestScore,
+            java.time.LocalDateTime lastAnalyzedAt
 //            Integer interviewCount
-//    ) {
-//        return new ResumeListItemDTO(
-//                resume.getId(),
-//                resume.getOriginalFilename(),
-//                resume.getFileSize(),
-//                resume.getUploadedAt(),
-//                resume.getAccessCount(),
-//                latestScore,
-//                lastAnalyzedAt,
+    ) {
+        return new ResumeListItemDTO(
+                resume.getId(),
+                resume.getOriginalFilename(),
+                resume.getFileSize(),
+                resume.getUploadedAt(),
+                resume.getAccessCount(),
+                latestScore,
+                lastAnalyzedAt
 //                interviewCount
-//        );
-//    }
+        );
+    }
 
 //    /**
 //     * 简化版：从 ResumeEntity 直接映射（其他字段为 null）
@@ -62,31 +67,31 @@ public interface ResumeMapper {
 //    ResumeDetailDTO toDetailDTOBasic(ResumeEntity entity);
 //
 //    // ========== AnalysisHistoryDTO 映射 ==========
-//
-//    /**
-//     * ResumeAnalysisEntity 转换为 AnalysisHistoryDTO
-//     * 注意：strengths 和 suggestions 需要在 Service 层从 JSON 解析后传入
-//     */
-//    @Mapping(target = "strengths", source = "strengths")
-//    @Mapping(target = "suggestions", source = "suggestions")
-//    ResumeDetailDTO.AnalysisHistoryDTO toAnalysisHistoryDTO(
-//            ResumeAnalysisEntity entity,
-//            List<String> strengths,
-//            List<Object> suggestions
-//    );
-//
-//    /**
-//     * 批量转换（需要在 Service 层处理 JSON）
-//     */
-//    default List<ResumeDetailDTO.AnalysisHistoryDTO> toAnalysisHistoryDTOList(
-//            List<ResumeAnalysisEntity> entities,
-//            java.util.function.Function<ResumeAnalysisEntity, List<String>> strengthsExtractor,
-//            java.util.function.Function<ResumeAnalysisEntity, List<Object>> suggestionsExtractor
-//    ) {
-//        return entities.stream()
-//                .map(e -> toAnalysisHistoryDTO(e, strengthsExtractor.apply(e), suggestionsExtractor.apply(e)))
-//                .toList();
-//    }
+
+    /**
+     * ResumeAnalysisEntity 转换为 AnalysisHistoryDTO
+     * 注意：strengths 和 suggestions 需要在 Service 层从 JSON 解析后传入
+     */
+    @Mapping(target = "strengths", source = "strengths")
+    @Mapping(target = "suggestions", source = "suggestions")
+    ResumeDetailDTO.AnalysisHistoryDTO toAnalysisHistoryDTO(
+            ResumeAnalysisEntity entity,
+            List<String> strengths,
+            List<Object> suggestions
+    );
+
+    /**
+     * 批量转换（需要在 Service 层处理 JSON）
+     */
+    default List<ResumeDetailDTO.AnalysisHistoryDTO> toAnalysisHistoryDTOList(
+            List<ResumeAnalysisEntity> entities,
+            java.util.function.Function<ResumeAnalysisEntity, List<String>> strengthsExtractor,
+            java.util.function.Function<ResumeAnalysisEntity, List<Object>> suggestionsExtractor
+    ) {
+        return entities.stream()
+                .map(e -> toAnalysisHistoryDTO(e, strengthsExtractor.apply(e), suggestionsExtractor.apply(e)))
+                .toList();
+    }
 
     // ========== ResumeAnalysisEntity 创建映射 ==========
 

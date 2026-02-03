@@ -100,6 +100,11 @@ public class ResumePersistenceService {
         return getLatestAnalysis(resumeId).map(this::entityToDTO);
     }
 
+
+    public List<ResumeEntity> findAllResumes() {
+        return resumeRepository.findAll();
+    }
+
     /**
      * transfer to DTO
      */
@@ -161,6 +166,10 @@ public class ResumePersistenceService {
             log.error("序列化评测结果失败: {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.RESUME_ANALYSIS_FAILED, "保存评测结果失败");
         }
+    }
+
+    public List<ResumeAnalysisEntity> findAnalysesByResumeId(Long id){
+        return analysisRepository.findByResumeIdOrderByAnalyzedAtDesc(id);
     }
 
 
