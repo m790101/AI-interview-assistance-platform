@@ -5,6 +5,7 @@ import interview.guide.common.model.AsyncTaskStatus;
 import interview.guide.infrastructure.file.FileStorageService;
 import interview.guide.infrastructure.file.FileValidationService;
 import interview.guide.modules.interview.model.ResumeAnalysisResponse;
+import interview.guide.modules.resume.listener.AnalyzeStreamProducer;
 import interview.guide.modules.resume.model.ResumeAnalysisEntity;
 import interview.guide.modules.resume.model.ResumeEntity;
 import interview.guide.modules.resume.repository.ResumeRepository;
@@ -28,7 +29,7 @@ public class ResumeUploadService {
     private final ResumePersistenceService persistenceService;
     private final AppConfigProperties appConfig;
     private final FileValidationService fileValidationService;
-//    private final AnalyzeStreamProducer analyzeStreamProducer;
+    private final AnalyzeStreamProducer analyzeStreamProducer;
     private final ResumeGradingService gradingService;
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -56,20 +57,9 @@ public class ResumeUploadService {
         // save to db
         ResumeEntity savedResume = persistenceService.saveResume(file, resumeText, fileKey, fileUrl);
 
-        // ai analyze
-        ResumeAnalysisResponse analysis = gradingService.analyzeResume(resumeText);
 
-//         4. 再次检查简历是否存在（分析期间可能被删除）
-//        ResumeEntity resume = resumeRepository.findById(savedResume.getId()).orElse(null);
-//        if (resume == null) {
-//            log.warn("简历在分析期间被删除，跳过保存结果: resumeId={}", savedResume.getId());
-//        }
-        persistenceService.saveAnalysis(savedResume, analysis);
-
-        // 4. 更新状态为 COMPLETED
-//        updateAnalyzeStatus(resumeId, AsyncTaskStatus.COMPLETED, null);
-
-        // return result
+        // send event to message queue
+        analyzeStreamProducer.sendAnalyzeTask(savedResume.getId(),resumeText);
 
         return Map.of(
                 "resume", Map.of(
