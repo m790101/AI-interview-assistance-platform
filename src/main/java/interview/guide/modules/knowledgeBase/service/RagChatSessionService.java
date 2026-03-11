@@ -17,6 +17,7 @@ import interview.guide.modules.knowledgeBase.model.RagChatDTO.SessionDTO;
 import interview.guide.modules.knowledgeBase.model.RagChatDTO.SessionDetailDTO;
 import interview.guide.modules.knowledgeBase.model.RagChatDTO.SessionListItemDTO;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 
 import java.util.HashSet;
 import java.util.List;
@@ -161,7 +162,7 @@ public class RagChatSessionService {
     }
 
 
-    public String getStreamAnswer(Long sessionId, String question) {
+    public Flux<String> getStreamAnswer(Long sessionId, String question) {
         // get knowledge base id
         RagChatSessionEntity session = sessionRepository.findByIdWithKnowledgeBases(sessionId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND, "session not found"));
@@ -169,7 +170,7 @@ public class RagChatSessionService {
         List<Long> kbIds = session.getKnowledgeBaseIds();
 
         // call query service to get answer
-        return queryService.answerQuestion(kbIds, question);
+        return queryService.answerQuestionStream(kbIds, question);
     }
 
     // ========== 私有方法 ==========

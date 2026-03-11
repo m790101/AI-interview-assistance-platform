@@ -19,8 +19,8 @@ public class KnowledgeBaseCountService {
     private final KnowledgeBaseRepository knowledgeBaseRepository;
 
 
-    public void updateQuestionCounts(List<Long> knowledgeBaseIds){
-        if(knowledgeBaseIds == null || knowledgeBaseIds.isEmpty()){
+    public void updateQuestionCounts(List<Long> knowledgeBaseIds) {
+        if (knowledgeBaseIds == null || knowledgeBaseIds.isEmpty()) {
             return;
         }
         // remove duplication
@@ -34,14 +34,11 @@ public class KnowledgeBaseCountService {
                 .toList()
         );
 
-        for(Long id : uniqueIds){
-            if(!existingIds.contains(id)){
+        for (Long id : uniqueIds) {
+            if (!existingIds.contains(id)) {
                 throw new BusinessException(ErrorCode.NOT_FOUND, "knowledge base is not exist" + id);
             }
         }
-
-
-
 
     }
 

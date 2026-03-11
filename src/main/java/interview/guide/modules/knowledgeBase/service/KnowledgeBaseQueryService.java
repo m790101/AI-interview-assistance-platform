@@ -12,6 +12,7 @@ import org.springframework.ai.document.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -131,6 +132,42 @@ public class KnowledgeBaseQueryService {
         Long primaryKbId = request.knowledgeBaseIds().getFirst();
 
         return new QueryResponse(answer, primaryKbId, kbNamesStr);
+    }
+
+
+    public Flux<String> answerQuestionStream(List<Long> knowledgeBaseIds, String question){
+        // check if knowledge base exists
+        countService.updateQuestionCounts(knowledgeBaseIds);
+
+        // search with vector db
+        List<Document> relevantDoc = vectorService.similaritySearch(question, knowledgeBaseIds, 5);
+        if(relevantDoc.isEmpty()){
+            return Flux.just("sorry can't find any relevant document, please change knowledge base or try later");
+        }
+        // build for query for AI
+        String context = relevantDoc.stream().map(Document::toString).collect(Collectors.joining("\n\n---\n\n"));
+        String systemPrompt = buildSystemPrompt();
+        String userPrompt = buildUserPrompt(context, question, knowledgeBaseIds);
+        try{
+            Flux<String> responseFlux = chatClient.prompt()
+                    .system(systemPrompt)
+                    .user(userPrompt)
+                    .stream()
+                    .content();
+
+            log.info("stream response start: kbIds={}", knowledgeBaseIds);
+
+            // return answer with flux
+            return responseFlux.doOnComplete(()-> log.info("stream response start: kbIds={}",knowledgeBaseIds))
+                    .onErrorResume(e -> {
+                        log.error("stream response fail: kbIds={}, error={}", knowledgeBaseIds, e.getMessage(), e);
+                        return Flux.just("【错误】知识库查询失败：AI服务暂时不可用，请稍后重试。");
+                    });
+        } catch (Exception e) {
+            log.error("知识库问答失败: {}", e.getMessage(), e);
+            throw new BusinessException(ErrorCode.KNOWLEDGE_BASE_QUERY_FAILED, "知识库查询失败：" + e.getMessage());
+        }
+
     }
 
 }

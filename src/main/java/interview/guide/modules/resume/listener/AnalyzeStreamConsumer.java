@@ -90,17 +90,17 @@ public class AnalyzeStreamConsumer {
      * 处理单条消息
      */
     private void processMessage(StreamMessageId messageId, Map<String, String> data) {
-        String kbIdStr = data.get(AsyncTaskStreamConstants.FIELD_KB_ID);
+        String resumeIdStr = data.get(AsyncTaskStreamConstants.FIELD_RESUME_ID);
         String content = data.get(AsyncTaskStreamConstants.FIELD_CONTENT);
         String retryCountStr = data.getOrDefault(AsyncTaskStreamConstants.FIELD_RETRY_COUNT, "0");
 
-        if (kbIdStr == null || content == null) {
-            log.warn("消息格式错误，跳过: messageId={}", messageId);
+        if (resumeIdStr == null || content == null) {
+            log.warn("消息格式错误，跳过: messageId={}, kbIdStr={}", messageId, resumeIdStr);
             ackMessage(messageId);
             return;
         }
 
-        Long resumeId = Long.parseLong(kbIdStr);
+        Long resumeId = Long.parseLong(resumeIdStr);
         int retryCount = Integer.parseInt(retryCountStr);
 
         log.info("开始处理简历分析任务: resumeId={}, messageId={}, retryCount={}", resumeId, messageId, retryCount);
